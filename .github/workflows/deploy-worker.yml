@@ -29,7 +29,8 @@ jobs:
           sed -i "s/GITHUB_REPO = \"\"/GITHUB_REPO = \"$(echo ${{ github.repository }} | cut -d'/' -f2)\"/" wrangler.toml
           
       - name: Deploy Worker
-        run: wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_WORKER }} 
+        run: wrangler deploy 
