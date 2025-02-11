@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Upload</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        /* Only keep status styling since Pico doesn't handle this specific case */
+        #status { 
+            margin-top: 20px; 
+            padding: 10px; 
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>CSV Upload</h1>
+        <form id="uploadForm">
+            <label for="email">
+                Email
+                <input type="email" id="email" required placeholder="Where to send results">
+            </label>
+            
+            <label for="csvFile">
+                CSV File
+                <input type="file" id="csvFile" accept=".csv" required>
+            </label>
+            
+            <button type="submit">Upload CSV</button>
+        </form>
+        <div id="status"></div>
+    </main>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('status');
+            status.textContent = 'Uploading...';
+            
+            try {
+                const email = document.getElementById('email').value;
+                const file = document.getElementById('csvFile').files[0];
+                
+                if (file.size > 1024 * 1024 * 10) { // 10MB limit
+                    throw new Error('File too large. Maximum size is 10MB.');
+                }
+                
+                // Convert file to base64
+                const fileContent = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.readAsDataURL(file);
+                });
+
+                // Call the Cloudflare Worker
+                const response = await fetch('https://csv-processor.YOUR_SUBDOMAIN.workers.dev', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        file_content: fileContent
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    status.textContent = 'Upload successful! You will receive the results via email.';
+                    e.target.reset();
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                status.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

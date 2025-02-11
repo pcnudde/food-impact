@@ -1,0 +1,35 @@
+name: Deploy Cloudflare Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker.js'
+      - 'wrangler.toml'
+      - '.github/workflows/deploy-worker.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Wrangler
+        run: npm install -g wrangler
+        
+      - name: Update wrangler.toml
+        run: |
+          sed -i "s/GITHUB_OWNER = \"\"/GITHUB_OWNER = \"${{ github.repository_owner }}\"/" wrangler.toml
+          sed -i "s/GITHUB_REPO = \"\"/GITHUB_REPO = \"$(echo ${{ github.repository }} | cut -d'/' -f2)\"/" wrangler.toml
+          
+      - name: Deploy Worker
+        run: wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_WORKER }} 
