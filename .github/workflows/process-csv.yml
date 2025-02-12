@@ -34,8 +34,8 @@ jobs:
               console.log('Repository dispatch payload:', body);
             } else if (context.eventName === 'workflow_dispatch') {
               body = {
-                email: ${{ github.event.inputs.email }},
-                file_content: ${{ github.event.inputs.file_content }}
+                email: context.payload.inputs.email,
+                file_content: context.payload.inputs.file_content
               };
               console.log('Manual trigger inputs - email:', body.email);
               console.log('Manual trigger has file content:', !!body.file_content);
