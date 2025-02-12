@@ -1,18 +1,10 @@
 import sys
-import pandas as pd
-
 
 def process_csv(input_file):
-    # Read the CSV
-    df = pd.read_csv(input_file)
-    
-    # Do some simple processing (example: add a column with row numbers)
-    df['row_number'] = range(1, len(df) + 1)
-    
-    # Save the processed file
-    df.to_csv('output.csv', index=False)
-
-
+    # Copy the input file to output.csv line by line
+    with open(input_file, 'r') as infile, open('output.csv', 'w') as outfile:
+        for line in infile:
+            outfile.write(line)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
