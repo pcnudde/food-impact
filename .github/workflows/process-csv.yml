@@ -27,32 +27,31 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            console.log('Event name:', github.event_name);
             let body;
             if (github.event_name === 'repository_dispatch') {
               body = github.event.client_payload;
+              console.log('Repository dispatch payload:', body);
             } else {
               body = {
                 email: core.getInput('email'),
                 file_content: core.getInput('file_content')
               };
+              console.log('Manual trigger inputs - email:', body.email);
+              console.log('Manual trigger has file content:', !!body.file_content);
             }
             
             if (!body.email || !body.file_content) {
-              return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Missing required fields' })
-              };
+              core.setOutput('statusCode', '400');
+              core.setFailed('Missing required fields');
+              return;
             }
 
             // Set outputs to be used in later steps.
+            core.setOutput('statusCode', '200');
             core.setOutput('email', body.email);
             core.setOutput('file_content', body.file_content);
-            core.setOutput('statusCode', 200);  // Add explicit statusCode output
-
-            return {
-              statusCode: 200,
-              body: JSON.stringify({ message: 'Processing started' })
-            };
+            console.log('Outputs set successfully');
 
       - name: Debug Outputs
         run: |
@@ -61,13 +60,13 @@ jobs:
           echo "Has File Content: ${{ steps.process.outputs.file_content != '' }}"
 
       - name: Set up Python
-        if: steps.process.outputs.statusCode == '200'  # Compare with string '200'
+        if: steps.process.outputs.statusCode == '200'
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           
       - name: Save and Process CSV
-        if: steps.process.outputs.statusCode == 200
+        if: steps.process.outputs.statusCode == '200'
         env:
           FILE_CONTENT: ${{ steps.process.outputs.file_content }}
         run: |
