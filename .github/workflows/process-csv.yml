@@ -76,6 +76,22 @@ jobs:
           echo "$FILE_CONTENT" | base64 -d > input.csv
           python process_csv.py input.csv
         
+      - name: Upload input CSV
+        if: steps.process.outputs.statusCode == '200'
+        uses: actions/upload-artifact@v4
+        with:
+          name: input-csv
+          path: input.csv
+          retention-days: 5
+
+      - name: Upload output CSV
+        if: steps.process.outputs.statusCode == '200'
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-csv
+          path: output.csv
+          retention-days: 5
+        
       - name: Send email
         if: steps.process.outputs.statusCode == 200
         uses: dawidd6/action-send-mail@v3
@@ -84,8 +100,8 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: Your CSV Processing Results
+          subject: Your food impact results
           to: ${{ steps.process.outputs.email }}
-          from: CSV Processor
+          from: Food Impact Processor
           body: Please find your processed CSV results attached.
           attachments: ./output.csv
