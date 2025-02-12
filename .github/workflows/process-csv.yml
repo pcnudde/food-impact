@@ -30,7 +30,7 @@ jobs:
             console.log('Event name:', context.eventName);
             let body;
             if (context.eventName === 'repository_dispatch') {
-              body = github.event.client_payload;
+              body = context.payload.client_payload;
               console.log('Repository dispatch payload:', body);
             } else if (context.eventName === 'workflow_dispatch') {
               body = {
