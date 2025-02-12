@@ -27,18 +27,21 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            console.log('Event name:', github.event_name);
+            console.log('Event name:', context.eventName);
             let body;
-            if (github.event_name === 'repository_dispatch') {
+            if (context.eventName === 'repository_dispatch') {
               body = github.event.client_payload;
               console.log('Repository dispatch payload:', body);
-            } else {
+            } else if (context.eventName === 'workflow_dispatch') {
               body = {
                 email: core.getInput('email'),
                 file_content: core.getInput('file_content')
               };
               console.log('Manual trigger inputs - email:', body.email);
               console.log('Manual trigger has file content:', !!body.file_content);
+            } else {
+              console.warn('Unknown event type, no inputs provided');
+              body = {};
             }
             
             if (!body.email || !body.file_content) {
