@@ -31,7 +31,6 @@ jobs:
             let body;
             if (context.eventName === 'repository_dispatch') {
               body = context.payload.client_payload;
-              console.log('Repository dispatch payload:', body);
             } else if (context.eventName === 'workflow_dispatch') {
               body = {
                 email: context.payload.inputs.email,
@@ -54,7 +53,6 @@ jobs:
             core.setOutput('statusCode', '200');
             core.setOutput('email', body.email);
             core.setOutput('file_content', body.file_content);
-            console.log('Outputs set successfully');
 
       - name: Debug Outputs
         run: |
