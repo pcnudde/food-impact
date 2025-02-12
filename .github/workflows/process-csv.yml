@@ -47,14 +47,21 @@ jobs:
             // Set outputs to be used in later steps.
             core.setOutput('email', body.email);
             core.setOutput('file_content', body.file_content);
+            core.setOutput('statusCode', 200);  // Add explicit statusCode output
 
             return {
               statusCode: 200,
               body: JSON.stringify({ message: 'Processing started' })
             };
 
+      - name: Debug Outputs
+        run: |
+          echo "Status Code: ${{ steps.process.outputs.statusCode }}"
+          echo "Email: ${{ steps.process.outputs.email }}"
+          echo "Has File Content: ${{ steps.process.outputs.file_content != '' }}"
+
       - name: Set up Python
-        if: steps.process.outputs.statusCode == 200
+        if: steps.process.outputs.statusCode == '200'  # Compare with string '200'
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
