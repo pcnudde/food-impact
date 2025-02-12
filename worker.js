@@ -17,17 +17,9 @@ export default {
 
     try {
       const body = await request.json();
-      console.log('Received request body:', {
-        email: body.email,
-        file_content_length: body.file_content?.length || 0
-      });
       
       // Validate required fields
       if (!body.email || !body.file_content) {
-        console.error('Missing required fields:', {
-          hasEmail: !!body.email,
-          hasFileContent: !!body.file_content
-        });
         return new Response(
           JSON.stringify({ 
             ok: false, 
@@ -42,14 +34,6 @@ export default {
           }
         );
       }
-
-      // Log GitHub API request details
-      console.log('GitHub API request:', {
-        url: `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/dispatches`,
-        owner: env.GITHUB_OWNER,
-        repo: env.GITHUB_REPO,
-        tokenLength: env.GITHUB_TOKEN?.length || 0
-      });
 
       // Forward to GitHub API
       const githubResponse = await fetch(
@@ -72,21 +56,11 @@ export default {
         }
       );
 
-      // Log GitHub API response
-      console.log('GitHub API response:', {
-        status: githubResponse.status,
-        statusText: githubResponse.statusText,
-        ok: githubResponse.ok,
-        headers: Object.fromEntries(githubResponse.headers)
-      });
-
       // Get response details if available
       let responseDetails = '';
       try {
         responseDetails = await githubResponse.text();
-        console.log('GitHub API response details:', responseDetails);
       } catch (e) {
-        console.error('Failed to get response details:', e);
         responseDetails = 'No response details available';
       }
 
@@ -106,7 +80,6 @@ export default {
       );
 
     } catch (error) {
-      console.error('Worker error:', error);
       return new Response(
         JSON.stringify({ 
           ok: false, 
