@@ -59,7 +59,8 @@ export default {
           headers: {
             'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
             'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'User-Agent': 'Cloudflare-Worker'
           },
           body: JSON.stringify({
             event_type: 'process-csv',
