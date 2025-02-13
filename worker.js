@@ -25,17 +25,23 @@ export default {
             ok: false, 
             error: 'Missing required fields: email and file_content' 
           }), 
-          { 
-            status: 400,
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*'
-            }
-          }
+          { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
         );
       }
 
-      // Forward to GitHub API
+      // Store file in R2
+      const filename = `csv-${Date.now()}.csv`;
+      const fileContent = Buffer.from(body.file_content, 'base64');
+      
+      await env.FILE_BUCKET.put(filename, fileContent, {
+        expirationTtl: 3600, // 1 hour expiration
+        httpMetadata: { contentType: 'text/csv' }
+      });
+
+      // Get public URL for the file
+      const fileUrl = `https://${env.R2_PUBLIC_URL}/${filename}`;
+
+      // Forward to GitHub API with file URL instead of content
       const githubResponse = await fetch(
         `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/dispatches`,
         {
@@ -50,7 +56,7 @@ export default {
             event_type: 'process-csv',
             client_payload: {
               email: body.email,
-              file_content: body.file_content
+              file_url: fileUrl
             }
           })
         }

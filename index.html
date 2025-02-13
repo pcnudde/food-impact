@@ -42,8 +42,8 @@
                 const email = document.getElementById('email').value;
                 const file = document.getElementById('csvFile').files[0];
                 
-                if (file.size > 1024 * 1024 * 10) { // 10MB limit
-                    throw new Error('File too large. Maximum size is 10MB.');
+                if (file.size > 1024 * 1024 * 100) { // Increased to 100MB limit
+                    throw new Error('File too large. Maximum size is 100MB.');
                 }
                 
                 // Convert file to base64

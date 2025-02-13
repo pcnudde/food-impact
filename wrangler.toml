@@ -6,5 +6,9 @@ compatibility_date = "2024-01-01"
 GITHUB_OWNER = ""  # Set via GitHub Actions
 GITHUB_REPO = ""   # Set via GitHub Actions 
 
+[[r2_buckets]]
+binding = "FILE_BUCKET"
+bucket_name = "food-impact"
+
 [observability.logs]
 enabled = true

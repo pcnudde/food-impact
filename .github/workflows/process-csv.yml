@@ -61,10 +61,10 @@ jobs:
       - name: Save and Process CSV
         if: steps.process.outputs.statusCode == '200'
         env:
-          FILE_CONTENT: ${{ steps.process.outputs.file_content }}
+          FILE_URL: ${{ steps.process.outputs.file_url }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          echo "$FILE_CONTENT" | base64 -d > input.csv
+          curl -L "$FILE_URL" > input.csv
           docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY food-impact
 
       - name: Upload input CSV
