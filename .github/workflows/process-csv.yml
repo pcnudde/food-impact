@@ -60,20 +60,10 @@ jobs:
           echo "Email: ${{ steps.process.outputs.email }}"
           echo "Has File Content: ${{ steps.process.outputs.file_content != '' }}"
 
-      - name: Set up Python
+      - name: Build Docker image
         if: steps.process.outputs.statusCode == '200'
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+        run: docker build -t food-impact .
           
-      - name: Save and Process CSV
-        if: steps.process.outputs.statusCode == '200'
-        env:
-          FILE_CONTENT: ${{ steps.process.outputs.file_content }}
-        run: |
-          echo "$FILE_CONTENT" | base64 -d > input.csv
-          python process_csv.py input.csv
-        
       - name: Upload input CSV
         if: steps.process.outputs.statusCode == '200'
         uses: actions/upload-artifact@v4
@@ -81,6 +71,15 @@ jobs:
           name: input-csv
           path: input.csv
           retention-days: 5
+
+      - name: Save and Process CSV
+        if: steps.process.outputs.statusCode == '200'
+        env:
+          FILE_CONTENT: ${{ steps.process.outputs.file_content }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "$FILE_CONTENT" | base64 -d > input.csv
+          docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY food-impact
 
       - name: Upload output CSV
         if: steps.process.outputs.statusCode == '200'
@@ -102,4 +101,4 @@ jobs:
           to: ${{ steps.process.outputs.email }}
           from: Food Impact Processor
           body: Please find your processed CSV results attached.
-          attachments: ./output.csv
+          attachments: ./output.zip
