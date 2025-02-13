@@ -29,8 +29,10 @@ export default {
         );
       }
 
-      // Store file in R2
-      const filename = `csv-${Date.now()}.csv`;
+      // Generate a UUID v4 with timestamp prefix for better organization
+      const timestamp = Date.now();
+      const uuid = crypto.randomUUID();
+      const filename = `csv-${timestamp}-${uuid}.csv`;
       const fileContent = Buffer.from(body.file_content, 'base64');
       
       await env.FILE_BUCKET.put(filename, fileContent, {
