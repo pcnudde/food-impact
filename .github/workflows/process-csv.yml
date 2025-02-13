@@ -54,24 +54,10 @@ jobs:
             core.setOutput('email', body.email);
             core.setOutput('file_content', body.file_content);
 
-      - name: Debug Outputs
-        run: |
-          echo "Status Code: ${{ steps.process.outputs.statusCode }}"
-          echo "Email: ${{ steps.process.outputs.email }}"
-          echo "Has File Content: ${{ steps.process.outputs.file_content != '' }}"
-
       - name: Build Docker image
         if: steps.process.outputs.statusCode == '200'
         run: docker build -t food-impact .
           
-      - name: Upload input CSV
-        if: steps.process.outputs.statusCode == '200'
-        uses: actions/upload-artifact@v4
-        with:
-          name: input-csv
-          path: input.csv
-          retention-days: 5
-
       - name: Save and Process CSV
         if: steps.process.outputs.statusCode == '200'
         env:
@@ -81,13 +67,21 @@ jobs:
           echo "$FILE_CONTENT" | base64 -d > input.csv
           docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY food-impact
 
+      - name: Upload input CSV
+        if: steps.process.outputs.statusCode == '200'
+        uses: actions/upload-artifact@v4
+        with:
+          name: input-csv
+          path: input.csv
+          retention-days: 5
+
       - name: Upload output CSV
         if: steps.process.outputs.statusCode == '200'
         uses: actions/upload-artifact@v4
         with:
           name: output-csv
-          path: output.csv
-          retention-days: 5
+          path: output.zip
+          retention-days: 60
         
       - name: Send email
         if: steps.process.outputs.statusCode == 200

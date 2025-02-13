@@ -1,4 +1,5 @@
 mkdir -p output
+cp host/input.csv output/input.csv
 
 # Run scripts and capture output to both console and log file
 python part1.py host/input.csv 2>&1 | tee output/log.txt
