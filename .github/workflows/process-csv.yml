@@ -6,8 +6,8 @@ on:
       email:
         description: 'Email address to send results to'
         required: true
-      file_content:
-        description: 'Base64 encoded CSV content'
+      file_url:
+        description: 'CSV file URL'
         required: true
   repository_dispatch:
     types: [process-csv]
@@ -34,16 +34,16 @@ jobs:
             } else if (context.eventName === 'workflow_dispatch') {
               body = {
                 email: context.payload.inputs.email,
-                file_content: context.payload.inputs.file_content
+                file_url: context.payload.inputs.file_url
               };
               console.log('Manual trigger inputs - email:', body.email);
-              console.log('Manual trigger has file content:', !!body.file_content);
+              console.log('Manual trigger has file URL:', !!body.file_url);
             } else {
               console.warn('Unknown event type, no inputs provided');
               body = {};
             }
             
-            if (!body.email || !body.file_content) {
+            if (!body.email || !body.file_url) {
               core.setOutput('statusCode', '400');
               core.setFailed('Missing required fields');
               return;
@@ -52,7 +52,7 @@ jobs:
             // Set outputs to be used in later steps.
             core.setOutput('statusCode', '200');
             core.setOutput('email', body.email);
-            core.setOutput('file_content', body.file_content);
+            core.setOutput('file_url', body.file_url);
 
       - name: Build Docker image
         if: steps.process.outputs.statusCode == '200'
