@@ -58,14 +58,12 @@ jobs:
         if: steps.process.outputs.statusCode == '200'
         run: docker build -t food-impact .
           
-      - name: Save and Process CSV
+      - name: Download CSV
         if: steps.process.outputs.statusCode == '200'
         env:
           FILE_URL: ${{ steps.process.outputs.file_url }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           curl -L "$FILE_URL" > input.csv
-          docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY food-impact
 
       - name: Upload input CSV
         if: steps.process.outputs.statusCode == '200'
@@ -74,6 +72,14 @@ jobs:
           name: input-csv
           path: input.csv
           retention-days: 5
+
+      - name: Process CSV
+        if: steps.process.outputs.statusCode == '200'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY food-impact
+
 
       - name: Upload output CSV
         if: steps.process.outputs.statusCode == '200'
