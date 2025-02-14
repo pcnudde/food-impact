@@ -36,7 +36,6 @@ export default {
       const fileContent = Uint8Array.from(atob(body.file_content), c => c.charCodeAt(0));
       
       await env.FILE_BUCKET.put(filename, fileContent, {
-        expirationTtl: 3600, // 1 hour expiration
         httpMetadata: { contentType: 'text/csv' }
       });
 
