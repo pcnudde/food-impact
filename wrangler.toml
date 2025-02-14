@@ -5,6 +5,7 @@ compatibility_date = "2024-01-01"
 [vars]
 GITHUB_OWNER = ""  # Set via GitHub Actions
 GITHUB_REPO = ""   # Set via GitHub Actions 
+R2_PUBLIC_URL = "pub-0f24b347c9444fd0ab5fddc917a2c9c9.r2.dev"
 
 [[r2_buckets]]
 binding = "FILE_BUCKET"
