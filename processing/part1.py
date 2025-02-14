@@ -26,6 +26,8 @@ from openai import OpenAI,RateLimitError
 if len(sys.argv) != 2:
     print("Usage: python part1.py <input_file>")
     sys.exit(1)
+
+print("Starting Processing")
         
 input_file = sys.argv[1]
 
@@ -124,6 +126,8 @@ def process_item(index, item, weight, unit, qty):
 
 # Use ThreadPoolExecutor for parallel processing
 results = []
+total_items = len(items)
+processed_items = 0
 with concurrent.futures.ThreadPoolExecutor() as executor:
     future_to_item = {
         executor.submit(process_item, index, item, weight, unit, qty): (index, item)
@@ -135,6 +139,9 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
         except Exception as exc:
             index_item_pair = future_to_item[future]
             print(f"Item {index_item_pair} generated an exception: {exc}")
+        processed_items += 1
+        if processed_items % 10 == 0:
+            print(f"Processed {processed_items}/{total_items} items ({(processed_items/total_items)*100:.1f}%)")
 
 # Prepare dataframe from results
 columns = ["index", "product", "ingredient", "product_weight", "unit", "percent", "weight_ingredient", "qty"]
