@@ -33,7 +33,7 @@ export default {
       const timestamp = Date.now();
       const uuid = crypto.randomUUID();
       const filename = `csv-${timestamp}-${uuid}.csv`;
-      const fileContent = Buffer.from(body.file_content, 'base64');
+      const fileContent = Uint8Array.from(atob(body.file_content), c => c.charCodeAt(0));
       
       await env.FILE_BUCKET.put(filename, fileContent, {
         expirationTtl: 3600, // 1 hour expiration
