@@ -79,7 +79,7 @@ qty = df['qty'].tolist()  # Ensure 'qty' is read from the input file
 def get_ingredients(item):
     # First, prioritize known ingredients
     known_ingredients = {ing: 100 for ing in prioritized_ingredients if re.search(rf"\b{re.escape(ing)}\b", item, re.IGNORECASE)}
-    
+
     if known_ingredients:
         return known_ingredients  # Return directly if any known ingredient matches 100%
 
@@ -95,8 +95,8 @@ def get_ingredients(item):
               " Please give your answer in json. Output the JSON only. Json schema {'ingredient name': Percentage}")
 
     completion = client.chat.completions.create(
-        model="gpt-4o",
-        #        model="gpt-4o-mini",
+        #model="gpt-4o",
+        model="gpt-4o-mini",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "You are a food scientist and you know the formulation of common products"},
@@ -119,7 +119,12 @@ def process_item(index, item, weight, unit, qty):
         try:
             percent = float(percent_str)
         except (ValueError, TypeError):
+            print(f"Error: {percent_str} is not a valid percentage in {item}, index {index}")
             continue
+        except Exception as e:
+            print(f"Error: {e} in {item}, index {index}")
+            continue
+
         weight_ingredient = round(weight * (percent / 100.0), 4)
         sanitized_rows.append((index + 2, item, sanitized_ingredient, weight, unit, percent, weight_ingredient, qty))
     return sanitized_rows

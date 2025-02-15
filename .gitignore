@@ -3,5 +3,5 @@ processing/output/*
 in20.csv
 in100.csv
 input.csv
-processing/output.zip
 output.zip
+output/*
