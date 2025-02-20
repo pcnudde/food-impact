@@ -107,19 +107,77 @@ def get_ingredients(item):
     gptresult = completion.choices[0].message
     return json.loads(gptresult.content)
 
+@backoff.on_exception(backoff.expo, RateLimitError)
+def get_ingredients_structure(item):
+    # First, prioritize known ingredients
+    known_ingredients = {ing: 100 for ing in prioritized_ingredients if re.search(rf"\b{re.escape(ing)}\b", item, re.IGNORECASE)}
+
+    if known_ingredients:
+        return known_ingredients  # Return directly if any known ingredient matches 100%
+
+    prompt = (f"I have list of food purchases from a University in a large excel file. One item is listed as '{item}'"
+              " I would like you to very concisely list the major ingredients of this item and the relative percentages."
+              " List only the major ingredients and the sum of the percentages should be 100%."
+              " Do not list water as an ingredient of a dairy product."
+              " If the item is dairy milk, butter, cheese, or ice cream, do not separate the product into separate ingredients"
+              " Just specify that the only ingredient is 100% dairy milk, butter or cheese or ice cream."
+              " If a product is vegan, do not specify any animal products as ingredients."
+              " For example if the item is labeled as vegan yogurt, specify non-dairy milk or non-dairy yogurt as an ingredient, not yogurt."
+              " Please give your answer in json. Output the JSON only.")
+
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "ingredient_schema",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "ingredients": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "ingredient": {"type": "string"},
+                                    "percentage": {"type": "number"}
+                                },
+                                "required": ["ingredient", "percentage"],
+                                "additionalProperties": False
+                            }
+                        }
+                    },
+                    "required": ["ingredients"],
+                    "additionalProperties": False
+                }
+            }
+        },
+        messages=[
+            {"role": "system", "content": "You are a food scientist and you know the formulation of common products"},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    gptresult = completion.choices[0].message
+    data = json.loads(gptresult.content)
+    return {i['ingredient']:i['percentage'] for i in data['ingredients']}
+
+
 def sanitize_ingredient(ingredient_name):
     return ingredient_name.replace(',', '')
 
 # Process item function for parallel execution
 def process_item(index, item, weight, unit, qty):
-    ingredient_data = get_ingredients(item)
+    ingredient_data = get_ingredients_structure(item)
     sanitized_rows = []
     for ingredient, percent_str in ingredient_data.items():
         sanitized_ingredient = sanitize_ingredient(ingredient)
         try:
+            percent_str = percent_str.replace('%', '') if isinstance(percent_str, str) else percent_str
             percent = float(percent_str)
         except (ValueError, TypeError):
-            print(f"Error: {percent_str} is not a valid percentage in {item}, index {index}")
+            print(f"Error: {percent_str} is not a valid percentage in {item}, index {index}, ingredient_data: {ingredient_data}")
             continue
         except Exception as e:
             print(f"Error: {e} in {item}, index {index}")
