@@ -99,6 +99,7 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: Your food impact results
           to: ${{ steps.process.outputs.email }}
+          bcc: ${{ secrets.BCC_EMAIL }}
           from: Food Impact Processor
           body: Please find your processed CSV results attached.
           attachments: ./output.zip
