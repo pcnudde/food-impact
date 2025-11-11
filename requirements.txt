@@ -1,3 +1,5 @@
 pandas
 openai
 backoff
+papermill
+ipykernel

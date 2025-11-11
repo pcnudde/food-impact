@@ -17,5 +17,5 @@ RUN sed -i 's/\r$//' process.sh
 # Use shell form instead of exec form for ENTRYPOINT
 ENTRYPOINT ["sh", "process.sh"]
 
-
+# docker build -t food-impact .
 #  docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY -it food-impact
