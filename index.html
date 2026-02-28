@@ -11,11 +11,105 @@
             margin-top: 20px; 
             padding: 10px; 
         }
+        .instructions-panel {
+            margin-bottom: 2rem;
+        }
+        table {
+            font-size: 0.85em;
+        }
     </style>
 </head>
 <body>
     <main class="container">
         <h1>CSV Upload</h1>
+        <article class="instructions-panel">
+            <h2>Formatting Instructions</h2>
+            <p>Please save your procurement worksheet as a .csv file and adjust the column headers to use our standard names before uploading. Click the section below that matches your data format:</p>
+
+            <details>
+                <summary><strong>Type 01: Quantity and units in one column</strong></summary>
+                <p>If your worksheet lists the quantity and the unit of measure in a single column:</p>
+                <ul>
+                    <li>Make sure to name the product column "product".</li>
+                    <li>Change the quantity column's name to "product_weight".</li>
+                    <li>Type "type01" anywhere in the first column (like the row just beneath your last item).</li>
+                </ul>
+                <table role="grid">
+                    <thead>
+                        <tr>
+                            <th>product</th>
+                            <th>product_weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Harissa Paste (Tunisian) 40z EA JAR</td>
+                            <td>80.000 OZ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </details>
+
+            <details>
+                <summary><strong>Type 02: Total weight without a specific unit column</strong></summary>
+                <p>If your worksheet shows the total weight in pounds, but lacks a dedicated column specifying that the unit is pounds:</p>
+                <ul>
+                    <li>Update the item description header to say "product".</li>
+                    <li>Update the total weight header to say "product_weight".</li>
+                    <li>Change the quantity shipped header to "qty".</li>
+                    <li>Insert a blank column and name its header "unit".</li>
+                    <li>Delete any summary or "Total" rows at the bottom of the list.</li>
+                    <li>Type "type02" anywhere in the first column (like the row just beneath your last item).</li>
+                </ul>
+                <table role="grid">
+                    <thead>
+                        <tr>
+                            <th>product</th>
+                            <th>Item #</th>
+                            <th>qty</th>
+                            <th>product_weight</th>
+                            <th>unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>MILK WHOLE $4/1$ GAL *RG*</td>
+                            <td>77820</td>
+                            <td>1</td>
+                            <td>32</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </details>
+
+            <details>
+                <summary><strong>Type 03: Weight integrated into description</strong></summary>
+                <p>If your worksheet includes the product weight information directly within the product description field:</p>
+                <ul>
+                    <li>Modify the item description header to be "product".</li>
+                    <li>Modify the quantity sold header to be "qty".</li>
+                    <li>Delete the "Grand Total" line at the bottom if there is one.</li>
+                    <li>Type "type03" into the first column, below the last data row.</li>
+                </ul>
+                <table role="grid">
+                    <thead>
+                        <tr>
+                            <th>product</th>
+                            <th>Stock Unit</th>
+                            <th>qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CHEDDAR CLOTHBOUND AGED CABOT 30 LB MC</td>
+                            <td>LB</td>
+                            <td>19</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </details>
+        </article>
         <form id="uploadForm">
             <label for="email">
                 Email
