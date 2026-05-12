@@ -51,13 +51,14 @@
             </details>
 
             <details>
-                <summary><strong>Type 02: Total weight without a specific unit column</strong></summary>
+                <summary><strong>Type 02: Total weight either already with or without a specific unit column</strong></summary>
                 <p>If your worksheet shows the total weight in pounds, but lacks a dedicated column specifying that the unit is pounds:</p>
                 <ul>
                     <li>Update the item description header to say "product".</li>
                     <li>Update the total weight header to say "product_weight".</li>
                     <li>Change the quantity shipped header to "qty".</li>
-                    <li>Insert a blank column and name its header "unit".</li>
+                    <li>If there is a column specifying units, such as kg or lbs name its header "unit".
+                    <li>But if there is no such column, insert a blank column and name its header "unit".</li>
                     <li>Delete any summary or "Total" rows at the bottom of the list.</li>
                     <li>Type "type02" anywhere in the first column (like the row just beneath your last item).</li>
                 </ul>
