@@ -1032,7 +1032,7 @@
                 $('stepFile').classList.add('is-done');
                 $('stepColumns').classList.remove('is-locked');
                 $('columnsBody').hidden = false;
-                $('stepColumnsSub').textContent = 'We matched these automatically. Fix anything that looks wrong.';
+                $('stepColumnsSub').textContent = 'We matched these automatically. Is the green choice correct? Fix anything that looks wrong.';
             } catch (err) {
                 console.error(err);
                 $('fileError').textContent = err.message || 'Couldn’t read this file. Try saving it as CSV.';
