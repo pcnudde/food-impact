@@ -3,3 +3,5 @@ openai
 backoff
 papermill
 ipykernel
+odfpy
+openpyxl
