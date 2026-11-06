@@ -505,6 +505,9 @@
 
         // Header names the notebook looks for; other columns that normalize to these get renamed.
         const STANDARD_NAMES = new Set(['product', 'product_weight', 'qty', 'unit']);
+        // Last column of the uploaded CSV: each line's row number in the user's worksheet, so the
+        // notebook's results name the rows the user sees (blank and total rows are not sent).
+        const SHEET_ROW_HEADER = 'Worksheet row';
 
         const PRODUCT_FIELD = { key: 'product', label: 'Product description', hint: 'The item name, as it appears on the invoice.', required: true, check: 'text' };
         const LAYOUTS = {
@@ -614,10 +617,16 @@
             if (['xlsx', 'xlsm', 'xls'].includes(ext)) {
                 if (!window.XLSX) await loadScript(XLSX_URL);
                 const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
-                return wb.SheetNames.map(name => ({
-                    name,
-                    rows: XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: true, defval: '', blankrows: false }),
-                }));
+                // Blank rows are kept so each row's position gives its row number in the sheet;
+                // firstRow is the sheet row of rows[0] (a sheet's used range may not start at row 1).
+                return wb.SheetNames.map(name => {
+                    const ws = wb.Sheets[name];
+                    return {
+                        name,
+                        firstRow: ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']).s.r + 1 : 1,
+                        rows: XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '', blankrows: true }),
+                    };
+                });
             }
             const buf = await file.arrayBuffer();
             let text;
@@ -627,14 +636,18 @@
                 // Excel on Windows often saves CSVs as Windows-1252.
                 text = new TextDecoder('windows-1252').decode(buf);
             }
-            const parsed = Papa.parse(text, { skipEmptyLines: 'greedy' });
-            return [{ name: null, rows: parsed.data }];
+            // Empty lines are kept so each row's position gives its row number in the file.
+            const parsed = Papa.parse(text, { skipEmptyLines: false });
+            return [{ name: null, firstRow: 1, rows: parsed.data }];
         }
 
         function cellText(v) {
             if (v === null || v === undefined) return '';
             return String(v).trim();
         }
+
+        const hasContent = row => row.some(c => cellText(c));
+        const usableSheet = s => s.rows.filter(hasContent).length > 1;
 
         function detectHeaderRow(rows) {
             const filled = r => r.reduce((n, c) => n + (cellText(c) ? 1 : 0), 0);
@@ -650,6 +663,7 @@
 
         function buildTable() {
             const raw = state.sheets[state.sheetIndex].rows;
+            const firstRow = state.sheets[state.sheetIndex].firstRow || 1;
             const h = state.headerRow;
             let width = 0;
             for (let i = h; i < raw.length; i++) width = Math.max(width, raw[i].length);
@@ -672,6 +686,7 @@
                     state.markerType = state.markerType || row[0].toLowerCase();
                     continue;
                 }
+                row.sheetRow = firstRow + i;
                 state.rows.push(row);
             }
             state.stats = state.headers.map((_, i) => columnStats(i));
@@ -846,7 +861,8 @@
             const options = [];
             for (let i = 0; i < Math.min(sheet.rows.length, 30); i++) {
                 const preview = sheet.rows[i].map(cellText).filter(Boolean).slice(0, 3).join(', ');
-                const label = `Row ${i + 1}${preview ? `: ${preview.length > 50 ? preview.slice(0, 50) + '…' : preview}` : ''}`;
+                if (!preview && i !== state.headerRow) continue;   // blank rows can't hold the column names
+                const label = `Row ${(sheet.firstRow || 1) + i}${preview ? `: ${preview.length > 50 ? preview.slice(0, 50) + '…' : preview}` : ''}`;
                 options.push(`<option value="${i}"${i === state.headerRow ? ' selected' : ''}>${esc(label)}</option>`);
             }
             $('headerSelect').innerHTML = options.join('');
@@ -973,16 +989,17 @@
         }
 
         // Rewrites the sheet into the shape the notebook expects: standard headers first,
-        // remaining columns after, summary rows removed, and a layout marker row at the end.
+        // remaining columns after, then the Worksheet row column; summary rows removed, and a
+        // layout marker row at the end.
         function buildCsv() {
             const { mapped } = outputColumns();
             const usedIdx = new Set(mapped.map(c => c.idx));
             const rest = state.headers.map((_, i) => i).filter(i => !usedIdx.has(i));
             const fields = mapped.map(c => c.key).concat(rest.map(i => {
                 const h = state.headers[i];
-                return STANDARD_NAMES.has(norm(h)) ? `${h} (original)` : h;
-            }));
-            const data = state.kept.map(row => mapped.map(c => c.value(row)).concat(rest.map(i => row[i])));
+                return STANDARD_NAMES.has(norm(h)) || norm(h) === norm(SHEET_ROW_HEADER) ? `${h} (original)` : h;
+            }), [SHEET_ROW_HEADER]);
+            const data = state.kept.map(row => mapped.map(c => c.value(row)).concat(rest.map(i => row[i]), [row.sheetRow]));
             data.push([state.layout].concat(Array(fields.length - 1).fill('')));
             return Papa.unparse({ fields, data });
         }
@@ -1023,9 +1040,9 @@
             $('dropzone').querySelector('strong').textContent = 'Reading file…';
             try {
                 const sheets = await readFile(file);
-                if (!sheets.some(s => s.rows.length > 1)) throw new Error('This file looks empty. It needs a header row and at least one item.');
+                if (!sheets.some(usableSheet)) throw new Error('This file looks empty. It needs a header row and at least one item.');
                 state = freshState(file, sheets);
-                state.sheetIndex = Math.max(0, sheets.findIndex(s => s.rows.length > 1));
+                state.sheetIndex = Math.max(0, sheets.findIndex(usableSheet));
                 loadSheet();
                 $('dropzone').hidden = true;
                 $('fileLoaded').hidden = false;
