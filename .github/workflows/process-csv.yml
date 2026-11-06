@@ -9,6 +9,15 @@ on:
       file_url:
         description: 'CSV file URL'
         required: true
+      job:
+        description: 'impacts = food impact results; stars / aia = add AASHE STARS / Anchors in Action dropdowns'
+        required: false
+        default: 'impacts'
+        type: choice
+        options:
+          - impacts
+          - stars
+          - aia
   repository_dispatch:
     types: [process-csv]
 
@@ -21,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Process Request
         id: process
         uses: actions/github-script@v7
@@ -34,7 +43,8 @@ jobs:
             } else if (context.eventName === 'workflow_dispatch') {
               body = {
                 email: context.payload.inputs.email,
-                file_url: context.payload.inputs.file_url
+                file_url: context.payload.inputs.file_url,
+                job: context.payload.inputs.job
               };
               console.log('Manual trigger inputs - email:', body.email);
               console.log('Manual trigger has file URL:', !!body.file_url);
@@ -42,22 +52,27 @@ jobs:
               console.warn('Unknown event type, no inputs provided');
               body = {};
             }
-            
+
             if (!body.email || !body.file_url) {
               core.setOutput('statusCode', '400');
               core.setFailed('Missing required fields');
               return;
             }
 
+            // Job type: impacts (default, also for requests without one), stars or aia
+            const job = ['stars', 'aia'].includes(body.job) ? body.job : 'impacts';
+            console.log('Job:', job);
+
             // Set outputs to be used in later steps.
             core.setOutput('statusCode', '200');
             core.setOutput('email', body.email);
             core.setOutput('file_url', body.file_url);
+            core.setOutput('job', job);
 
       - name: Build Docker image
         if: steps.process.outputs.statusCode == '200'
         run: docker build -t food-impact .
-          
+
       - name: Download CSV
         if: steps.process.outputs.statusCode == '200'
         env:
@@ -77,20 +92,21 @@ jobs:
         if: steps.process.outputs.statusCode == '200'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          JOB_TYPE: ${{ steps.process.outputs.job }}
         run: |
-          docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY food-impact
+          docker run -v $(pwd):/app/host -e OPENAI_API_KEY=$OPENAI_API_KEY -e JOB_TYPE=$JOB_TYPE food-impact
 
 
       - name: Upload output CSV
-        if: steps.process.outputs.statusCode == '200'
+        if: steps.process.outputs.statusCode == '200' && steps.process.outputs.job == 'impacts'
         uses: actions/upload-artifact@v4
         with:
           name: output-zip
           path: output.zip
           retention-days: 60
-        
+
       - name: Send email
-        if: steps.process.outputs.statusCode == 200
+        if: steps.process.outputs.statusCode == 200 && steps.process.outputs.job == 'impacts'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -103,3 +119,55 @@ jobs:
           from: Food Impact Processor
           body: Please find your processed CSV results attached.
           attachments: ./output.zip
+
+      # Dropdown jobs (stars / aia): email the worksheet with dropdowns, or why it failed
+
+      - name: Read dropdown email text
+        id: dropdown
+        if: steps.process.outputs.statusCode == '200' && steps.process.outputs.job != 'impacts'
+        env:
+          JOB: ${{ steps.process.outputs.job }}
+        run: |
+          if [ -f "worksheet_${JOB}_dropdowns.xlsx" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; fi
+          {
+            echo 'text<<END_OF_EMAIL_TEXT'
+            if [ -f email_body.txt ]; then cat email_body.txt; else echo "Sorry, your worksheet could not be processed. Please try again later."; fi
+            echo 'END_OF_EMAIL_TEXT'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload worksheet with dropdowns
+        if: steps.dropdown.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: worksheet-dropdowns
+          path: worksheet_${{ steps.process.outputs.job }}_dropdowns.xlsx
+          retention-days: 5
+
+      - name: Send worksheet with dropdowns
+        if: steps.dropdown.outputs.ok == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: Your worksheet with ${{ steps.process.outputs.job == 'stars' && 'AASHE STARS' || 'Anchors in Action' }} dropdowns
+          to: ${{ steps.process.outputs.email }}
+          bcc: ${{ secrets.BCC_EMAIL }}
+          from: Food Impact Processor
+          body: ${{ steps.dropdown.outputs.text }}
+          attachments: ./worksheet_${{ steps.process.outputs.job }}_dropdowns.xlsx
+
+      - name: Send dropdown problem email
+        if: steps.dropdown.outputs.ok == 'false'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: Your worksheet could not be processed
+          to: ${{ steps.process.outputs.email }}
+          bcc: ${{ secrets.BCC_EMAIL }}
+          from: Food Impact Processor
+          body: ${{ steps.dropdown.outputs.text }}
