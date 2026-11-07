@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AASHE STARS Dropdowns · Food Impact Analysis</title>
+    <meta name="description" content="Add AASHE STARS 3.0 (OP-7) certification dropdowns to a food purchasing worksheet, sent to your inbox.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%232d6a4f' d='M28 4C14 4 5 10 5 19.5c0 2.2.6 4.2 1.6 5.8L4 28l1.4 1.4 2.7-2.7c1.6 1 3.5 1.6 5.6 1.6C23 28.3 28 19 28 4z'/%3E%3C/svg%3E">
+    <!-- Built from pages_src/dropdowns_template.html; stars.html and aia.html differ only in their settings and wording. -->
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #f5f4ee;
+            --surface: #ffffff;
+            --surface-2: #f1f0e9;
+            --text: #1c2620;
+            --muted: #5b665f;
+            --border: #e0ded3;
+            --border-strong: #c8c5b7;
+            --accent: #2d6a4f;
+            --accent-hover: #24583f;
+            --accent-soft: #e3efe7;
+            --on-accent: #ffffff;
+            --warn: #7a5200;
+            --warn-soft: #fbf0d6;
+            --danger: #9b2c24;
+            --danger-soft: #fae6e3;
+            --focus: #2d6a4f;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 2px rgba(28, 38, 32, .05), 0 6px 20px rgba(28, 38, 32, .05);
+            --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #111513;
+                --surface: #181e1b;
+                --surface-2: #202824;
+                --text: #e6ebe7;
+                --muted: #9ba79f;
+                --border: #2b3530;
+                --border-strong: #3c4942;
+                --accent: #74c69d;
+                --accent-hover: #95d5b2;
+                --accent-soft: #1c3127;
+                --on-accent: #0c1d15;
+                --warn: #e9c46a;
+                --warn-soft: #2e2615;
+                --danger: #f28b82;
+                --danger-soft: #3a1d1b;
+                --focus: #95d5b2;
+                --shadow: none;
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 16px/1.55 var(--font);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrap { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+
+        a { color: var(--accent); }
+        code { font-family: var(--mono); font-size: .9em; }
+        [hidden] { display: none !important; }
+
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+        }
+
+        /* ---------- Header ---------- */
+        .hero { padding-top: 56px; padding-bottom: 28px; }
+        .eyebrow {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase;
+            color: var(--accent);
+        }
+        .eyebrow svg { width: 18px; height: 18px; }
+        h1 {
+            font-size: clamp(30px, 6vw, 44px); line-height: 1.08; letter-spacing: -.02em;
+            margin: 12px 0;
+        }
+        .lede { font-size: 18px; color: var(--muted); max-width: 62ch; margin: 0; }
+        .flow { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
+        .flow li { padding: 4px 11px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+        .flow li.here { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 650; }
+        .flow li.arrow { padding: 0; border: 0; background: none; color: var(--muted); }
+
+        /* ---------- Card & steps ---------- */
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); box-shadow: var(--shadow);
+        }
+        .step { padding: 24px; border-top: 1px solid var(--border); }
+        .step:first-child { border-top: 0; }
+        .step-head { display: flex; gap: 14px; align-items: flex-start; }
+        .step-num {
+            flex: none; width: 28px; height: 28px; border-radius: 50%;
+            display: grid; place-items: center; font-weight: 700; font-size: 14px;
+            background: var(--accent-soft); color: var(--accent);
+        }
+        .step.is-done .step-num { background: var(--accent); color: var(--on-accent); }
+        .step.is-locked .step-num { background: var(--surface-2); color: var(--muted); }
+        .step-title { font-size: 18px; font-weight: 650; margin: 1px 0 2px; line-height: 1.4; }
+        .step-sub { color: var(--muted); margin: 0; font-size: 15px; }
+        .step.is-locked .step-title { color: var(--muted); }
+        .step-body { margin-top: 18px; }
+        @media (min-width: 641px) { .step-body { margin-left: 42px; } }
+
+        /* ---------- Dropzone ---------- */
+        .drop {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            text-align: center; padding: 36px 16px;
+            border: 1.5px dashed var(--border-strong); border-radius: var(--radius-sm);
+            background: var(--surface-2); cursor: pointer;
+            transition: border-color .15s, background-color .15s;
+        }
+        .drop:hover, .drop.is-over { border-color: var(--accent); background: var(--accent-soft); }
+        .drop.is-over * { pointer-events: none; }
+        .drop:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+        .drop svg { width: 36px; height: 36px; color: var(--accent); margin-bottom: 6px; }
+        .drop strong { font-size: 16px; font-weight: 600; }
+        .drop .browse { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+        .drop small { color: var(--muted); font-size: 13.5px; }
+
+        .filechip {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px 14px;
+            border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2);
+        }
+        .filechip svg { flex: none; width: 28px; height: 28px; color: var(--accent); }
+        .filechip > div { flex: 1 1 160px; min-width: 0; }
+        .filechip .name { font-weight: 600; overflow-wrap: anywhere; line-height: 1.35; }
+        .filechip .meta { color: var(--muted); font-size: 14px; }
+        .filechip .btn { margin-left: auto; flex: none; }
+
+        .file-opts { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 14px; }
+        .inline-field { display: grid; gap: 4px; font-size: 14px; color: var(--muted); flex: 1 1 260px; }
+
+        select, input[type="email"] {
+            width: 100%; font: inherit; font-size: 15px; color: var(--text);
+            background-color: var(--surface); border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm); padding: 9px 12px; min-height: 44px;
+        }
+        select { cursor: pointer; }
+        select:focus-visible, input[type="email"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+        input[type="email"]::placeholder { color: var(--muted); opacity: .8; }
+
+        /* ---------- Summary & preview ---------- */
+        .summary { margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+        .summary strong { font-size: 15px; }
+        .summary span { color: var(--muted); font-size: 14px; }
+        .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+        table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: top; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+        th { background: var(--surface-2); font-weight: 600; font-size: 12.5px; }
+        tbody tr:last-child td { border-bottom: 0; }
+        td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        td.muted { color: var(--muted); }
+
+        /* ---------- Send ---------- */
+        .send-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+        @media (max-width: 640px) { .send-row { grid-template-columns: 1fr; } }
+        .send-row label { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
+        .fineprint { color: var(--muted); font-size: 13.5px; margin: 12px 0 0; }
+
+        /* ---------- Buttons ---------- */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            font: inherit; font-weight: 600; font-size: 15px; line-height: 1.2;
+            padding: 10px 18px; min-height: 44px; border-radius: var(--radius-sm);
+            border: 1px solid transparent; cursor: pointer; text-decoration: none;
+            transition: background-color .15s, border-color .15s;
+        }
+        .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+        .btn-primary { background: var(--accent); color: var(--on-accent); }
+        .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+        .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+        .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
+        .btn-ghost:hover { background: var(--surface); }
+        .btn-sm { min-height: 34px; padding: 6px 12px; font-size: 14px; }
+        .spinner {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 2px solid currentColor; border-right-color: transparent;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---------- Notices ---------- */
+        .notice { padding: 12px 14px; border-radius: var(--radius-sm); font-size: 14.5px; margin-top: 14px; border: 1px solid transparent; }
+        .notice.info { background: var(--surface-2); border-color: var(--border); }
+        .notice.warn { background: var(--warn-soft); color: var(--warn); }
+        .notice.error { background: var(--danger-soft); color: var(--danger); }
+        .notice:empty { display: none; }
+        .notice a { color: inherit; font-weight: 600; }
+        .caveat { max-width: 68ch; margin: 18px 0 0; font-size: 15px; line-height: 1.5; border-color: var(--warn); }
+
+        /* ---------- Done ---------- */
+        .done { padding: 32px 24px; }
+        .done-icon {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: grid; place-items: center; background: var(--accent-soft); color: var(--accent);
+        }
+        .done-icon svg { width: 22px; height: 22px; }
+        .done h2 { font-size: 22px; margin: 16px 0 6px; letter-spacing: -.01em; }
+        .done p { margin: 0; color: var(--muted); }
+        .done ol { margin: 18px 0 24px; padding-left: 20px; }
+        .done li + li { margin-top: 8px; }
+
+        /* ---------- Info ---------- */
+        .info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+        @media (max-width: 640px) { .info { grid-template-columns: 1fr; } }
+        .info .card { padding: 20px 22px; }
+        .info h2 { font-size: 16px; margin: 0 0 10px; }
+        .info ul, .info ol { padding-left: 20px; margin: 0; color: var(--muted); font-size: 14.5px; }
+        .info li + li { margin-top: 7px; }
+        .info li strong { color: var(--text); font-weight: 600; }
+        .info p { color: var(--muted); font-size: 14.5px; margin: 12px 0 0; }
+
+        footer.wrap { color: var(--muted); font-size: 13px; padding-top: 28px; padding-bottom: 48px; text-align: center; }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+            .spinner { animation-duration: 2s; }
+        }
+    </style>
+</head>
+<body>
+    <header class="wrap hero">
+        <span class="eyebrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            AASHE STARS &middot; OP-7
+        </span>
+        <h1>Add AASHE STARS dropdowns</h1>
+        <p class="lede">Upload a food purchasing worksheet and we'll email it back with dropdown columns for the STARS sustainable and ethical categories. Fill them in, then upload the completed sheet to get your results with the STARS shares.</p>
+        <p class="notice warn caveat" role="note"><strong>Note:</strong> This process is experimental. It has not been reviewed and approved for use as part of compliance with an AASHE/STARS values-based food procurement analysis. One major difference is that it typically measures relative to weights and/or calories purchased rather than expenditures.</p>
+        <ol class="flow" aria-label="How reporting works">
+            <li class="here">1. Add dropdowns (this page)</li>
+            <li class="arrow" aria-hidden="true">&rarr;</li>
+            <li>2. Fill them in</li>
+            <li class="arrow" aria-hidden="true">&rarr;</li>
+            <li>3. Upload for results at <a href="index.html">Food Impact Analysis</a></li>
+        </ol>
+    </header>
+
+    <main class="wrap">
+        <form id="uploadForm" class="card" novalidate>
+            <!-- Step 1 -->
+            <section class="step" id="stepFile" aria-labelledby="stepFileTitle">
+                <div class="step-head">
+                    <span class="step-num" aria-hidden="true">1</span>
+                    <div>
+                        <h2 class="step-title" id="stepFileTitle">Add your worksheet</h2>
+                        <p class="step-sub">A vendor invoice or purchasing report, as CSV or Excel.</p>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <label class="drop" id="dropzone" for="fileInput">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
+                        <strong>Drop your file here or <span class="browse">browse</span></strong>
+                        <small>.csv, .xlsx or .xls &middot; up to 50&nbsp;MB</small>
+                        <input class="sr-only" type="file" id="fileInput" accept=".csv,.tsv,.txt,.xlsx,.xlsm,.xls,text/csv">
+                    </label>
+
+                    <div id="fileLoaded" hidden>
+                        <div class="filechip">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h8M8 9h2"/></svg>
+                            <div>
+                                <div class="name" id="fileName"></div>
+                                <div class="meta" id="fileMeta"></div>
+                            </div>
+                            <button type="button" class="btn btn-ghost btn-sm" id="changeFile">Change file</button>
+                        </div>
+                        <div class="file-opts">
+                            <label class="inline-field" id="sheetField" hidden>
+                                Sheet
+                                <select id="sheetSelect"></select>
+                            </label>
+                            <label class="inline-field">
+                                Column names are in
+                                <select id="headerSelect"></select>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="notice error" id="fileError" role="alert"></div>
+                </div>
+            </section>
+
+            <!-- Step 2 -->
+            <section class="step is-locked" id="stepCheck" aria-labelledby="stepCheckTitle">
+                <div class="step-head">
+                    <span class="step-num" aria-hidden="true">2</span>
+                    <div>
+                        <h2 class="step-title" id="stepCheckTitle">Check the worksheet</h2>
+                        <p class="step-sub">Your columns are kept as they are. The dropdown columns are added after the last one.</p>
+                    </div>
+                </div>
+                <div class="step-body" id="checkBody" hidden>
+                    <div class="summary" id="summary"></div>
+                    <div class="table-wrap" id="preview"></div>
+                    <div class="notice" id="checkNotice"></div>
+                </div>
+            </section>
+
+            <!-- Step 3 -->
+            <section class="step is-locked" id="stepSend" aria-labelledby="stepSendTitle">
+                <div class="step-head">
+                    <span class="step-num" aria-hidden="true">3</span>
+                    <div>
+                        <h2 class="step-title" id="stepSendTitle">Get your worksheet with dropdowns</h2>
+                        <p class="step-sub">It arrives by email as an Excel file, usually within a few minutes.</p>
+                    </div>
+                </div>
+                <div class="step-body">
+                    <div class="send-row">
+                        <label for="email">
+                            Email address
+                            <input type="email" id="email" autocomplete="email" required placeholder="you@example.org">
+                        </label>
+                        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                            <span class="spinner" id="spinner" hidden></span>
+                            <span id="submitLabel">Add dropdowns</span>
+                        </button>
+                    </div>
+                    <p class="fineprint">The email comes from &ldquo;Food Impact Processor&rdquo;. If it doesn't arrive, check your spam folder.</p>
+                    <div class="notice" id="status" role="status" aria-live="polite"></div>
+                </div>
+            </section>
+        </form>
+
+        <section class="card done" id="donePanel" hidden tabindex="-1" aria-labelledby="doneTitle">
+            <div class="done-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <h2 id="doneTitle">Your worksheet is on its way</h2>
+            <p id="doneText"></p>
+            <ol>
+                <li>Look for an email titled &ldquo;Your worksheet with AASHE STARS dropdowns&rdquo;, usually within a few minutes. If it doesn't arrive, check your spam folder.</li>
+                <li>Open the attached Excel file, fill in the dropdowns that apply, and save it.</li>
+                <li>Upload the saved file at <a href="index.html">Food Impact Analysis</a> to get your results.</li>
+            </ol>
+            <button type="button" class="btn btn-ghost" id="startOver">Add dropdowns to another worksheet</button>
+        </section>
+
+        <div class="info">
+            <section class="card" aria-labelledby="addedTitle">
+                <h2 id="addedTitle">What gets added</h2>
+                <ul>
+                    <li><strong>Six AASHE columns</strong>: Organic, Animal Welfare, Environment, Labor, Small Producers and Seafood. Each lists the certifications and programs STARS 3.0 accepts in that category.</li>
+                    <li><strong>Local Credit</strong> and <strong>Social Impact Supplier</strong> (y or blank). STARS gives no credit for local purchases alone; local is tracked only.</li>
+                    <li><strong>Plant Based</strong> (y or a processing category 1&ndash;4) and <strong>Explanation</strong>.</li>
+                </ul>
+                <p>A Notes sheet explains each column, and an AASHE Lookup sheet lists the STARS categories each option meets.</p>
+            </section>
+            <section class="card" aria-labelledby="nextTitle">
+                <h2 id="nextTitle">Then</h2>
+                <ol>
+                    <li>Fill in the dropdowns that apply. Leave the rest blank.</li>
+                    <li>Upload the completed sheet at <a href="index.html">Food Impact Analysis</a>.</li>
+                    <li>Your results include the STARS sustainable/ethical and plant-based shares, with each product counted once.</li>
+                </ol>
+                <p>Reporting for Anchors in Action instead? Use <a href="aia.html">Add Anchors in Action dropdowns</a>.</p>
+            </section>
+        </div>
+    </main>
+
+    <footer class="wrap">Dropdown options come from the certifier list used by Food Impact Analysis.</footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script>
+    (() => {
+        'use strict';
+
+        // ---------- Settings for this page ----------
+        const JOB = 'stars';                 // tells the service which dropdowns to add
+        const FRAMEWORK = 'AASHE STARS';
+        // Headings the dropdown notebook adds for this job (add_certifier_dropdowns.ipynb). A sheet
+        // that already has one of them can't be prepared again.
+        const ADDED_HEADINGS = ["AASHE Organic", "AASHE Animal Welfare", "AASHE Environment", "AASHE Labor", "AASHE Small Producers", "AASHE Seafood", "Local Credit (enter y if yes)", "Social Impact Supplier (enter y if yes)", "Plant Based (y or 1-4)", "Explanation (optional)"];
+        // Headings the other job adds, to mention (not block) when a sheet already has them.
+        const OTHER_HEADINGS = ["AW food group", "AW", "Env", "No routine antibiotics (y-cert or y)", "Labor", "Local (GFPP level)", "Social Impact Supplier", "Program year", "Nutrition checklist points (%)"];
+        const OTHER_NAME = 'Anchors in Action';
+
+        const WORKER_URL = 'https://csv-processor.peter-cnudde.workers.dev';
+        const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        // Cloudflare Workers cap request bodies at 100 MB and base64 adds a third, so stay well under.
+        const MAX_BYTES = 50 * 1024 * 1024;
+        const EMAIL_KEY = 'food-impact:email';
+        const NUMBER_RE = /^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/;
+
+        // ---------- Helpers ----------
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const fmt = n => n.toLocaleString('en-US');
+        const plural = (n, one, many = one + 's') => `${fmt(n)} ${n === 1 ? one : many}`;
+        const isNumber = v => NUMBER_RE.test(v.replace(/,/g, ''));
+        const sizeLabel = bytes => bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+        const quoteList = items => items.map(h => `“${esc(h)}”`).join(', ');
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = resolve;
+                s.onerror = () => reject(new Error('Couldn’t load the Excel reader. Check your connection, or save the sheet as CSV.'));
+                document.head.appendChild(s);
+            });
+        }
+
+        const storage = {
+            get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+            set(key, value) { try { localStorage.setItem(key, value); } catch { /* storage unavailable */ } },
+        };
+
+        // ---------- State ----------
+        let state = null;
+
+        // ---------- Reading files ----------
+        // Excel cells are read as values (numbers stay numbers); date cells use the text the
+        // sheet shows, so they don't turn into date serial numbers.
+        function sheetRows(ws) {
+            if (!ws['!ref']) return { firstRow: 1, rows: [] };
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            const rows = [];
+            for (let r = range.s.r; r <= range.e.r; r++) {
+                const row = [];
+                for (let c = range.s.c; c <= range.e.c; c++) {
+                    const cell = ws[XLSX.utils.encode_cell({ r, c })];
+                    if (!cell || cell.v === undefined || cell.v === null) { row.push(''); continue; }
+                    const isDate = cell.t === 'd' || (cell.t === 'n' && cell.z && XLSX.SSF.is_date(cell.z));
+                    row.push(isDate && cell.w ? cell.w : cell.v);
+                }
+                rows.push(row);
+            }
+            return { firstRow: range.s.r + 1, rows };
+        }
+
+        async function readFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (['xlsx', 'xlsm', 'xls'].includes(ext)) {
+                if (!window.XLSX) await loadScript(XLSX_URL);
+                // cellNF keeps each cell's number format, which is how date cells are recognised
+                const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellNF: true });
+                return wb.SheetNames.map(name => ({ name, ...sheetRows(wb.Sheets[name]) }));
+            }
+            const buf = await file.arrayBuffer();
+            let text;
+            try {
+                text = new TextDecoder('utf-8', { fatal: true }).decode(buf);
+            } catch {
+                // Excel on Windows often saves CSVs as Windows-1252.
+                text = new TextDecoder('windows-1252').decode(buf);
+            }
+            const parsed = Papa.parse(text, { skipEmptyLines: false });
+            return [{ name: null, firstRow: 1, rows: parsed.data }];
+        }
+
+        function cellText(v) {
+            if (v === null || v === undefined) return '';
+            return String(v).trim();
+        }
+
+        const hasContent = row => row.some(c => cellText(c));
+        const usableSheet = s => s.rows.filter(hasContent).length > 1;
+
+        function detectHeaderRow(rows) {
+            const filled = r => r.reduce((n, c) => n + (cellText(c) ? 1 : 0), 0);
+            let widest = 0;
+            for (let i = 0; i < Math.min(rows.length, 60); i++) widest = Math.max(widest, filled(rows[i]));
+            for (let i = 0; i < Math.min(rows.length, 30); i++) {
+                const cells = rows[i].map(cellText).filter(Boolean);
+                const numeric = cells.filter(isNumber).length;
+                if (cells.length >= Math.max(2, Math.ceil(widest * 0.6)) && numeric <= cells.length * 0.25) return i;
+            }
+            return 0;
+        }
+
+        // The column headings and item rows as they will be sent: headings from the chosen row,
+        // every row below it that has something in it, and no empty columns at the right edge.
+        function buildTable() {
+            const raw = state.sheets[state.sheetIndex].rows;
+            const h = state.headerRow;
+            let width = 0;
+            for (let i = h; i < raw.length; i++) {
+                const row = raw[i] || [];
+                for (let c = row.length - 1; c >= 0; c--) {
+                    if (cellText(row[c])) { width = Math.max(width, c + 1); break; }
+                }
+            }
+            state.headers = Array.from({ length: width }, (_, c) => cellText((raw[h] || [])[c]));
+            state.rows = [];
+            for (let i = h + 1; i < raw.length; i++) {
+                const row = Array.from({ length: width }, (_, c) => cellText((raw[i] || [])[c]));
+                if (row.some(Boolean)) state.rows.push(row);
+            }
+            const names = new Set(state.headers);
+            state.clash = ADDED_HEADINGS.filter(x => names.has(x));
+            state.other = OTHER_HEADINGS.filter(x => names.has(x));
+            state.blankHeads = state.headers.filter(x => !x).length;
+            const counts = {};
+            state.headers.filter(Boolean).forEach(x => { counts[x] = (counts[x] || 0) + 1; });
+            state.repeated = Object.keys(counts).filter(x => counts[x] > 1);
+        }
+
+        // ---------- Rendering ----------
+        function renderFileInfo() {
+            const sheet = state.sheets[state.sheetIndex];
+            $('fileName').textContent = state.file.name;
+            $('fileMeta').textContent = [
+                sizeLabel(state.file.size),
+                plural(state.rows.length, 'row'),
+                plural(state.headers.length, 'column'),
+            ].join(' · ');
+
+            $('sheetField').hidden = state.sheets.length < 2;
+            $('sheetSelect').innerHTML = state.sheets
+                .map((s, i) => `<option value="${i}"${i === state.sheetIndex ? ' selected' : ''}>${esc(s.name)}</option>`)
+                .join('');
+
+            const options = [];
+            for (let i = 0; i < Math.min(sheet.rows.length, 30); i++) {
+                const preview = sheet.rows[i].map(cellText).filter(Boolean).slice(0, 3).join(', ');
+                if (!preview && i !== state.headerRow) continue;   // blank rows can't hold the column names
+                const label = `Row ${(sheet.firstRow || 1) + i}${preview ? `: ${preview.length > 50 ? preview.slice(0, 50) + '…' : preview}` : ''}`;
+                options.push(`<option value="${i}"${i === state.headerRow ? ' selected' : ''}>${esc(label)}</option>`);
+            }
+            $('headerSelect').innerHTML = options.join('');
+        }
+
+        function renderCheck() {
+            $('summary').innerHTML = `<strong>${plural(state.rows.length, 'row')} and ${plural(state.headers.length, 'column')}</strong>`
+                + `<span>Check that the first row below shows your column names.</span>`;
+
+            const cols = state.headers.length;
+            if (!state.rows.length || !cols) {
+                $('preview').hidden = true;
+            } else {
+                const sample = state.rows.slice(0, 5);
+                const head = state.headers.map((x, i) => `<th scope="col">${x ? esc(x) : `<span class="muted">Column ${i + 1}</span>`}</th>`).join('');
+                const body = sample.map(row => '<tr>' + row.map(v => {
+                    const cls = isNumber(v) ? 'num' : (v ? '' : 'muted');
+                    return `<td class="${cls}" title="${esc(v)}">${v ? esc(v) : '&mdash;'}</td>`;
+                }).join('') + '</tr>').join('');
+                const more = state.rows.length > sample.length
+                    ? `<tr><td colspan="${cols}" class="muted">and ${fmt(state.rows.length - sample.length)} more</td></tr>` : '';
+                $('preview').hidden = false;
+                $('preview').innerHTML = `<table><caption class="sr-only">Preview of the first rows</caption><thead><tr>${head}</tr></thead><tbody>${body}${more}</tbody></table>`;
+            }
+
+            const el = $('checkNotice');
+            if (state.clash.length && state.other.length) {
+                // The two sets share the Plant Based and Explanation columns, so a sheet takes only one
+                el.className = 'notice error';
+                el.innerHTML = `This worksheet already has the ${esc(OTHER_NAME)} dropdowns (${quoteList(state.other.slice(0, 3))}${state.other.length > 3 ? '…' : ''}). `
+                    + `A worksheet can hold one set of dropdowns. To report to ${esc(FRAMEWORK)} as well, add the file without those columns `
+                    + `(your original worksheet), and fill in the ${esc(FRAMEWORK)} dropdowns in that copy.`;
+            } else if (state.clash.length) {
+                el.className = 'notice error';
+                const shown = state.clash.length > 3
+                    ? `${quoteList(state.clash.slice(0, 3))} and ${plural(state.clash.length - 3, 'other column')}`
+                    : quoteList(state.clash);
+                el.innerHTML = `This worksheet already has ${shown}, so it looks like it already has the ${esc(FRAMEWORK)} dropdowns. `
+                    + `If you have filled them in, upload it at <a href="index.html">Food Impact Analysis</a> to get your results. `
+                    + `Otherwise, remove those columns and add the file again.`;
+            } else {
+                const notes = [];
+                if (state.other.length) notes.push(`This worksheet has columns named like the ${esc(OTHER_NAME)} dropdowns (${quoteList(state.other.slice(0, 3))}${state.other.length > 3 ? '…' : ''}). They're kept, and the ${esc(FRAMEWORK)} columns are added after them.`);
+                if (!state.rows.length) notes.push('There are no rows below the column names. Check that “Column names are in” shows the right row.');
+                if (state.blankHeads) notes.push(`${plural(state.blankHeads, 'column has', 'columns have')} no name. ${state.blankHeads === 1 ? 'It’s' : 'They’re'} kept as ${state.blankHeads === 1 ? 'it is' : 'they are'}.`);
+                if (state.repeated.length) notes.push(`More than one column is named ${quoteList(state.repeated.slice(0, 3))}. They're kept, with a number added to the repeated names.`);
+                el.className = notes.length ? 'notice warn' : 'notice';
+                el.innerHTML = notes.join(' ');
+            }
+        }
+
+        function ready() {
+            return state && state.rows.length > 0 && state.headers.length > 0 && !state.clash.length;
+        }
+
+        function updateSubmit() {
+            const ok = ready();
+            $('submitBtn').disabled = !ok;
+            $('submitLabel').textContent = ok ? `Add dropdowns to ${plural(state.rows.length, 'row')}` : 'Add dropdowns';
+            $('stepCheck').classList.toggle('is-done', !!ok);
+            $('stepSend').classList.toggle('is-locked', !ok);
+        }
+
+        // ---------- Output ----------
+        // The worksheet as CSV with its column names in the first row, as the dropdown notebook reads it.
+        function buildCsv() {
+            return Papa.unparse({ fields: state.headers, data: state.rows });
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result).split(',')[1]);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // ---------- Status ----------
+        function showStatus(kind, message) {
+            const el = $('status');
+            el.className = `notice ${kind}`;
+            el.textContent = message;
+        }
+
+        function setBusy(busy) {
+            $('spinner').hidden = !busy;
+            $('submitBtn').disabled = busy || !state;
+            if (busy) $('submitLabel').textContent = 'Uploading…';
+            else updateSubmit();
+            document.querySelectorAll('#uploadForm select, #uploadForm input, #changeFile').forEach(el => { el.disabled = busy; });
+        }
+
+        // ---------- File handling ----------
+        async function handleFile(file) {
+            $('fileError').textContent = '';
+            showStatus('', '');
+            if (!file) return;
+            if (file.size > MAX_BYTES) {
+                $('fileError').textContent = `This file is ${sizeLabel(file.size)}. The limit is 50 MB.`;
+                return;
+            }
+            $('dropzone').querySelector('strong').textContent = 'Reading file…';
+            try {
+                const sheets = await readFile(file);
+                if (!sheets.some(usableSheet)) throw new Error('This file looks empty. It needs a row of column names and at least one item.');
+                state = { file, sheets, sheetIndex: Math.max(0, sheets.findIndex(usableSheet)), headerRow: 0 };
+                loadSheet();
+                $('dropzone').hidden = true;
+                $('fileLoaded').hidden = false;
+                $('stepFile').classList.add('is-done');
+                $('stepCheck').classList.remove('is-locked');
+                $('checkBody').hidden = false;
+            } catch (err) {
+                console.error(err);
+                $('fileError').textContent = err.message || 'Couldn’t read this file. Try saving it as CSV.';
+                reset(false);
+            } finally {
+                $('dropzone').querySelector('strong').innerHTML = 'Drop your file here or <span class="browse">browse</span>';
+            }
+        }
+
+        function loadSheet(headerRow) {
+            const rows = state.sheets[state.sheetIndex].rows;
+            state.headerRow = headerRow ?? detectHeaderRow(rows);
+            buildTable();
+            renderFileInfo();
+            renderCheck();
+            updateSubmit();
+        }
+
+        function reset(clearError = true) {
+            state = null;
+            $('fileInput').value = '';
+            if (clearError) $('fileError').textContent = '';
+            $('dropzone').hidden = false;
+            $('fileLoaded').hidden = true;
+            $('checkBody').hidden = true;
+            $('stepFile').classList.remove('is-done');
+            $('stepCheck').classList.add('is-locked');
+            $('stepCheck').classList.remove('is-done');
+            showStatus('', '');
+            updateSubmit();
+        }
+
+        // ---------- Events ----------
+        $('fileInput').addEventListener('change', e => handleFile(e.target.files[0]));
+        $('changeFile').addEventListener('click', () => { reset(); $('fileInput').click(); });
+
+        const dz = $('dropzone');
+        ['dragenter', 'dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('is-over'); }));
+        ['dragleave', 'drop'].forEach(t => dz.addEventListener(t, () => dz.classList.remove('is-over')));
+        dz.addEventListener('drop', e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); });
+        // Keep a missed drop from navigating away from the page.
+        ['dragover', 'drop'].forEach(t => window.addEventListener(t, e => e.preventDefault()));
+
+        $('sheetSelect').addEventListener('change', e => { state.sheetIndex = Number(e.target.value); loadSheet(); });
+        $('headerSelect').addEventListener('change', e => loadSheet(Number(e.target.value)));
+
+        $('uploadForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const emailInput = $('email');
+            if (!ready() || $('submitBtn').disabled) return;
+            if (!emailInput.checkValidity()) {
+                emailInput.reportValidity();
+                return;
+            }
+            const email = emailInput.value.trim();
+            setBusy(true);
+            showStatus('info', 'Uploading your worksheet…');
+            try {
+                const blob = new Blob([buildCsv()], { type: 'text/csv' });
+                if (blob.size > MAX_BYTES) throw new Error('This worksheet is too large to upload (over 50 MB).');
+                const fileContent = await blobToBase64(blob);
+
+                let response;
+                try {
+                    response = await fetch(WORKER_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, file_content: fileContent, job: JOB }),
+                    });
+                } catch {
+                    throw new Error('Couldn’t reach the upload server. Check your connection and try again.');
+                }
+                let data = {};
+                try { data = await response.json(); } catch { /* non-JSON error page */ }
+
+                // The worker replies 200 even when starting the GitHub job fails, so check its `ok` flag too.
+                if (!response.ok || data.ok === false) {
+                    if (data.error) throw new Error(data.error);
+                    if (data.status) {
+                        const reply = [data.status, data.statusText].filter(Boolean).join(' ');
+                        throw new Error(`The file uploaded, but processing couldn’t be started (GitHub responded ${reply}). Please try again later or contact the site maintainer.`);
+                    }
+                    throw new Error(`Upload failed (HTTP ${response.status}). Please try again.`);
+                }
+
+                storage.set(EMAIL_KEY, email);
+                $('doneText').innerHTML = `${esc(plural(state.rows.length, 'row'))} from <strong>${esc(state.file.name)}</strong> will come back with ${esc(FRAMEWORK)} dropdowns, sent to <strong>${esc(email)}</strong>.`;
+                $('uploadForm').hidden = true;
+                $('donePanel').hidden = false;
+                $('donePanel').focus();
+            } catch (err) {
+                console.error(err);
+                showStatus('error', err.message);
+            } finally {
+                setBusy(false);
+            }
+        });
+
+        $('startOver').addEventListener('click', () => {
+            reset();
+            $('donePanel').hidden = true;
+            $('uploadForm').hidden = false;
+            $('fileInput').focus();
+        });
+
+        const savedEmail = storage.get(EMAIL_KEY);
+        if (savedEmail) $('email').value = savedEmail;
+    })();
+    </script>
+</body>
+</html>
