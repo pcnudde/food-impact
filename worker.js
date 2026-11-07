@@ -29,6 +29,12 @@ export default {
         );
       }
 
+      const job = body.job || 'impacts';
+      if (!['impacts', 'stars', 'aia'].includes(job)) {
+        return new Response(JSON.stringify({ ok: false, error: 'Unknown job type' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+      }
+
       // Generate a UUID v4 with timestamp prefix for better organization
       const timestamp = Date.now();
       const uuid = crypto.randomUUID();
@@ -57,7 +63,8 @@ export default {
             event_type: 'process-csv',
             client_payload: {
               email: body.email,
-              file_url: fileUrl
+              file_url: fileUrl,
+              job: job
             }
           })
         }
@@ -102,4 +109,4 @@ export default {
       );
     }
   }
-}; 
+};
