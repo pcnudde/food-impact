@@ -712,7 +712,7 @@
                     response = await fetch(WORKER_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, file_content: fileContent, job: JOB }),
+                        body: JSON.stringify({ email, file_content: fileContent, job: JOB, filename: state.file.name }),
                     });
                 } catch {
                     throw new Error('Couldn’t reach the upload server. Check your connection and try again.');
