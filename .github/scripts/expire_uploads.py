@@ -39,7 +39,10 @@ assert rule in api(path)['rules'], 'Lifecycle verification failed'
 print('Verified R2 lifecycle: delete objects after one day.', flush=True)
 
 # R2 S3 credentials are derived from the existing API token, kept only in memory.
-verified = api('/user/tokens/verify')
+try:
+    verified = api(f'/accounts/{account}/tokens/verify')
+except RuntimeError:
+    verified = api('/user/tokens/verify')
 s3 = boto3.client('s3', endpoint_url=f'https://{account}.r2.cloudflarestorage.com',
                   region_name='auto', aws_access_key_id=verified['id'],
                   aws_secret_access_key=hashlib.sha256(token.encode()).hexdigest())
