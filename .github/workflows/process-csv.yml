@@ -115,7 +115,6 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: Your food impact results
           to: ${{ steps.process.outputs.email }}
-          bcc: ${{ secrets.BCC_EMAIL }}
           from: Food Impact Processor
           body: Please find your processed CSV results attached.
           attachments: ./output.zip
@@ -153,7 +152,6 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: Your worksheet with ${{ steps.process.outputs.job == 'stars' && 'AASHE STARS' || 'Anchors in Action' }} dropdowns
           to: ${{ steps.process.outputs.email }}
-          bcc: ${{ secrets.BCC_EMAIL }}
           from: Food Impact Processor
           body: ${{ steps.dropdown.outputs.text }}
           attachments: ./worksheet_${{ steps.process.outputs.job }}_dropdowns.xlsx
@@ -168,6 +166,5 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: Your worksheet could not be processed
           to: ${{ steps.process.outputs.email }}
-          bcc: ${{ secrets.BCC_EMAIL }}
           from: Food Impact Processor
           body: ${{ steps.dropdown.outputs.text }}
