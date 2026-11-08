@@ -30,6 +30,7 @@ export default {
       }
 
       const job = body.job || 'impacts';
+      const originalName = String(body.filename || '').slice(0, 200);
       if (!['impacts', 'stars', 'aia'].includes(job)) {
         return new Response(JSON.stringify({ ok: false, error: 'Unknown job type' }),
           { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
@@ -64,7 +65,8 @@ export default {
             client_payload: {
               email: body.email,
               file_url: fileUrl,
-              job: job
+              job: job,
+              filename: originalName
             }
           })
         }
