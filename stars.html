@@ -358,7 +358,7 @@
                 <ul>
                     <li><strong>Six AASHE columns</strong>: Organic, Animal Welfare, Environment, Labor, Small Producers and Seafood. Each lists the certifications and programs STARS 3.0 accepts in that category.</li>
                     <li><strong>Local Credit</strong> and <strong>Social Impact Supplier</strong> (y or blank). STARS gives no credit for local purchases alone; local is tracked only.</li>
-                    <li><strong>Plant Based</strong> (y or a processing category 1&ndash;4) and <strong>Explanation</strong>.</li>
+                    <li><strong>Plant Based</strong> (y or blank: mostly plants or fungi with no animal-derived ingredient, at any level of processing) and <strong>Explanation</strong>.</li>
                 </ul>
                 <p>A Notes sheet explains each column, and an AASHE Lookup sheet lists the STARS categories each option meets.</p>
             </section>
@@ -386,7 +386,7 @@
         const FRAMEWORK = 'AASHE STARS';
         // Headings the dropdown notebook adds for this job (add_certifier_dropdowns.ipynb). A sheet
         // that already has one of them can't be prepared again.
-        const ADDED_HEADINGS = ["AASHE Organic", "AASHE Animal Welfare", "AASHE Environment", "AASHE Labor", "AASHE Small Producers", "AASHE Seafood", "Local Credit (enter y if yes)", "Social Impact Supplier (enter y if yes)", "Plant Based (y or 1-4)", "Explanation (optional)"];
+        const ADDED_HEADINGS = ["AASHE Organic", "AASHE Animal Welfare", "AASHE Environment", "AASHE Labor", "AASHE Small Producers", "AASHE Seafood", "Local Credit (enter y if yes)", "Social Impact Supplier (enter y if yes)", "Plant Based (enter y if yes)", "Plant Based (y or 1-4)", "Explanation (optional)"];
         // Headings the other job adds, to mention (not block) when a sheet already has them.
         const OTHER_HEADINGS = ["AW food group", "AW", "Env", "No routine antibiotics (y-cert or y)", "Labor", "Local (GFPP level)", "Social Impact Supplier", "Program year", "Nutrition checklist points (%)"];
         const OTHER_NAME = 'Anchors in Action';
